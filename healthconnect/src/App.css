@@ -1,0 +1,18 @@
+*{
+  margin:0;
+  padding:0;
+ }
+
+.input-field {
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 5px;
+  outline: none;
+  border: 2px solid #e0e0e0;
+  transition: border-color 0.3s;
+}
+
+.input-field:focus {
+  border-color: #12B536;
+}
+

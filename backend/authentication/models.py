@@ -85,7 +85,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []      # No additional required fields
     user_role = models.CharField(max_length=20, choices=UserRoleChoices.choices, default=UserRoleChoices.patient)
     gender = models.CharField(max_length=10, choices=GenderChoices.choices)
-    dob = models.DateField()
+    dob = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
@@ -109,6 +109,9 @@ class User(AbstractUser):
         verbose_name=_('user permissions'),
     )
 
+    def __str__(self):
+        return self.first_name + " " + self.last_name
+
 
 class Notification(models.Model):
     """
@@ -125,3 +128,69 @@ class Notification(models.Model):
     message = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     seen = models.BooleanField(default=False)
+
+class DoctorProfile(models.Model):
+    """
+    Model representing a doctor profile.
+
+    Attributes:
+        id (Integer): The primary key and unique identifier of the doctor profile.
+        user (Relationship): Foreign key referencing the User.
+        specialization (String): The specialization of the doctor.
+        available (Boolean): Whether the doctor is available or not.
+        created_at (DateTime): The date and time when the doctor profile was created.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    specialization = models.CharField(max_length=100)
+    available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Dr. {self.user.first_name}"
+    
+class Allergy(models.Model):
+    """
+    Model representing an allergy.
+
+    Attributes:
+        id (Integer): The primary key and unique identifier of the allergy.
+        name (String): The name of the allergy.
+        created_at (DateTime): The date and time when the allergy was created.
+    """
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class PatientProfile(models.Model):
+    """
+    Model representing a patient profile.
+
+    Attributes:
+        id (Integer): The primary key and unique identifier of the patient profile.
+        user (Relationship): Foreign key referencing the User.
+        weight (Float): The weight of the patient.
+        height (Float): The height of the patient.
+        blood_glucose (Float): The blood glucose level of the patient.
+        blood_pressure (Float): The blood pressure of the patient.
+        allergies (Relationship): The allergies of the patient.
+        created_at (DateTime): The date and time when the patient profile was created.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    weight = models.FloatField(blank=True, null=True)
+    height = models.FloatField(blank=True, null=True)
+    blood_glucose = models.FloatField(blank=True, null=True)
+    blood_pressure = models.FloatField(blank=True, null=True)
+    allergies = models.ManyToManyField(
+        Allergy,
+        related_name='user',
+        blank=True,
+        help_text=_('Specific allergies for this patient.'),
+        verbose_name=_('allergies'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+    

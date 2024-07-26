@@ -116,3 +116,19 @@ def register(request):
         # email.send()
 
         return Response({'message': 'User registered successfully', 'status': 201}, status=201)
+
+@api_view(['POST', 'OPTIONS'])
+@authentication_classes([IsAuthenticated])
+def change_availability(request):
+    user = request.user
+    if user.user_role != UserRoleChoices.health_professional:
+        return Response({'error': 'Only health professionals can change availability'}, status=403)
+
+    doctor = DoctorProfile.objects.filter(user=user).first()
+    if not doctor:
+        return Response({'error': 'Doctor profile not found'}, status=404)
+
+    doctor.available = not doctor.available
+    doctor.save()
+
+    return Response({'message': 'Availability changed successfully'}, status=200)

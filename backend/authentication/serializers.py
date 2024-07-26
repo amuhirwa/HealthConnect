@@ -69,6 +69,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return super().validate(attrs)
 
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User model.
@@ -80,3 +81,40 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class AllergySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Allergy
+        fields = ['id', 'name']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj):
+        if obj.user_role == UserRoleChoices.health_professional:
+            return f"Dr. {obj.first_name} {obj.last_name}"
+        return f"{obj.first_name} {obj.last_name}"
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'name', 'phone']
+
+
+class PatientProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    allergies = AllergySerializer(many=True)
+
+
+    class Meta:
+        model = PatientProfile
+        fields = ['id', 'user', 'weight', 'height', 'blood_glucose', 'blood_pressure', 'allergies']
+
+
+class DoctorProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = DoctorProfile
+        fields = ['id', 'user', 'specialization', 'available']

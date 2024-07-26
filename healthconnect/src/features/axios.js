@@ -32,7 +32,7 @@ function createAxiosInstance() {
         store.getState().sharedData.usersLogin != []
       ) {
         // store.dispatch(resetStateToDefault());
-        window.location.href = "/auth";
+        window.location.href = "/login";
         /*  store.dispatch(resetStateToDefault());
         window.location.href = "/auth"; */
       } else {

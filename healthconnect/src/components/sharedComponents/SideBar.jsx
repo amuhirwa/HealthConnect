@@ -18,7 +18,7 @@ export default function SideBar({ isOpen, toggleSidebar }) {
         { icon: <TextSnippetIcon />, text: "Health Information" },
         { icon: <MedicationIcon />, text: "Prescriptions" },
         { icon: <PersonIcon />, text: "Account", category: "others" },
-        { icon: <HelpCenterIcon />, text: "Help", category: "others" }
+        { icon: <HelpCenterIcon />, text: "call", category: "others" }
     ];
     menuItems.map(item => item.active = page === item.text.toLowerCase() ? true : false);
 

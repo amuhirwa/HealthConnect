@@ -2,12 +2,16 @@ import { usePolling } from "./PollingContext";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useState } from "react";
+import { createCall } from "../../features/call";
+import { useDispatch } from "react-redux";
+import { addCallId, changepage } from "../../features/SharedData";
 
 export default function RandomMatch() {
   const { polling, setPolling, selectedSpecialty, setSelectedSpecialty, matchedDoctor, setMatchedDoctor } = usePolling();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const specialties = ["General", "Dermatology", "Cardiology"];
+  const dispatch = useDispatch();
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -81,13 +85,13 @@ export default function RandomMatch() {
             </div>
           </div>
           <button
-            className="w-full py-3 px-4 mb-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all flex justify-center items-center"
-            onClick={() => alert("Joining call...")}
+            className="w-full py-3 px-4 mb-4 text-[green] border border-[green] rounded-md hover:bg-green-700 hover:text-white transition-all flex justify-center items-center"
+            onClick={async () => {const callId = await createCall(''); dispatch(addCallId(callId)); dispatch(changepage('call'));}}
           >
             Join Call
           </button>
           <button
-            className="w-full py-3 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all flex justify-center items-center"
+            className="w-full py-3 px-4 text-[red] border border-[red] rounded-md hover:bg-red-500 hover:text-white transition-all flex justify-center items-center"
             onClick={handleRetry}
           >
             Retry

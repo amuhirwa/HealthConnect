@@ -3,7 +3,7 @@ import TopBar from "../sharedComponents/TopBar"
 
 export default function PatientDash() {
     return (
-        <div className="-mt-2 mx-3">
+        <div className="mx-3">
             <div className="top-half">
                 One Chart
             </div>

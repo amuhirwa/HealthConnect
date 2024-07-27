@@ -4,6 +4,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   usersLogin: [],
   page: "dashboard",
+  profile: {},
+  callId: null,
 };
 
 const sharedDataSlice = createSlice({
@@ -17,6 +19,19 @@ const sharedDataSlice = createSlice({
     changepage: (state, action) => {
       state.page = action.payload;
     },
+    addProfile: (state, action) => {
+      state.profile = action.payload;
+    },
+    updateProfile: (state, action) => {
+      state.profile.patient = { ...state.profile.patient, ...action.payload };
+    },
+    addCallId: (state, action) => {
+      console.log(action.payload)
+      state.callId = action.payload;
+    },
+    resetCallId: (state, action) => {
+      state.callId = null;
+    },
     resetStateToDefault: (state, action) => {
       // Reset state to initial values
       state.usersLogin = [];
@@ -28,6 +43,10 @@ const sharedDataSlice = createSlice({
 export const {
   addUserLogin,
   changepage,
+  addProfile,
+  addCallId,
+  resetCallId,
+  updateProfile,
   resetStateToDefault,
 } = sharedDataSlice.actions;
 

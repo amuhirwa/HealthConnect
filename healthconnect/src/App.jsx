@@ -7,6 +7,7 @@ import PatientDash from "./components/dashboard/PatientDash";
 import "./App.css";
 import Dashboard from "./pages/Dashboard";
 import { PollingProvider } from "./components/appointments/PollingContext";
+import VideoCall from "./components/appointments/VideoCall";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/call" element={<VideoCall />} />
             <Route path="/*" element={<div>404</div>} />
           </Routes>
         </BrowserRouter>

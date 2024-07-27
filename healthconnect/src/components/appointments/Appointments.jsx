@@ -1,144 +1,51 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import AppointmentRow from './AppointmentRow';
 import { useSelector, useDispatch } from 'react-redux';
 import { changepage } from '../../features/SharedData';
+import createAxiosInstance from '../../features/axios';
 
 export default function Appointments() {
   const [showUpcoming, setShowUpcoming] = useState(true);
   const page = useSelector((state) => state.sharedData.page);
+  const [soonAppointments, setSoonAppointments] = useState([]);
+  const [otherUpcomingAppointments, setOtherUpcomingAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
+  const instance = createAxiosInstance();
 
-  const upcomingAppointments = [
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. John Doe",
-      specialty: "Cardiology",
-      date: "2024-07-24",
-      time: "12:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Jane Smith",
-      specialty: "Dermatology",
-      date: "2024-07-25",
-      time: "10:00",
-    },
-  ];
-  
-  const pastAppointments = [
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Emily Johnson",
-      specialty: "Neurology",
-      date: "2024-06-20",
-      time: "14:00",
-    },
-    {
-      doctorAvatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-      doctorName: "Dr. Michael Brown",
-      specialty: "Pediatrics",
-      date: "2024-05-18",
-      time: "09:00",
-    },
-  ];
+  const handleCancel = (id) => {
+    setSoonAppointments((prev) => prev.filter(appointment => appointment.id !== id));
+    setOtherUpcomingAppointments((prev) => prev.filter(appointment => appointment.id !== id));
+  };
+
+  const getUpcomingAppointments = () => {
+    instance.get("appointments/get_upcoming_appointments")
+      .then((response) => {
+        setSoonAppointments(response.data.soon_appointments);
+        setOtherUpcomingAppointments(response.data.other_upcoming_appointments);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch upcoming appointments:", error);
+      });
+  };
+
+  const getPastAppointments = () => {
+    instance.get("appointments/get_past_appointments")
+      .then((response) => {
+        setPastAppointments(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch past appointments:", error);
+      });
+  };
+
+  useEffect(() => {
+    if (showUpcoming) {
+      getUpcomingAppointments();
+    } else {
+      getPastAppointments();
+    }
+  }, [showUpcoming]);
 
   const dispatch = useDispatch();
 
@@ -146,13 +53,15 @@ export default function Appointments() {
     setShowUpcoming(!showUpcoming);
   };
 
-  const appointments = showUpcoming ? upcomingAppointments : pastAppointments;
+  const appointments = showUpcoming 
+    ? [...soonAppointments, ...otherUpcomingAppointments] 
+    : pastAppointments;
 
   return (
     <div className="mt-2 mx-4 flex flex-col">
-      <div className="new-consultation mr-4 mb-1 ml-auto flex items-center text-[#2F4AD6] font-medium px-4 py-2 bg-[#149D5266] rounded-lg cursor-pointer" onClick={() => dispatch(changepage("new consultation"))}>
+      <div className="new-consultation mr-4 mb-1 ml-auto flex items-center text-white font-medium px-4 py-2 bg-green-600 hover:bg-green-700 transition-all rounded-lg cursor-pointer" onClick={() => dispatch(changepage("new consultation"))}>
         <AddIcon sx={{ fontSize: 28 }} />
-        <span className="text-md">New Consultation</span>
+        <span className="text-md font-light">New Consultation</span>
       </div>
       <div className="appointments-toggle mb-2 flex justify-center">
         <button
@@ -177,7 +86,14 @@ export default function Appointments() {
             </div>
           ) : (
             appointments.map((appointment, index) => (
-              <AppointmentRow appointment={appointment} index={index} showUpcoming={showUpcoming} />
+              <AppointmentRow 
+                key={index} 
+                appointment={appointment} 
+                index={index} 
+                showUpcoming={showUpcoming} 
+                highlight={soonAppointments.includes(appointment)} 
+                onCancel={handleCancel}
+              />
             ))
           )}
         </div>

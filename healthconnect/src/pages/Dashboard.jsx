@@ -6,10 +6,13 @@ import { useSelector } from "react-redux";
 import Appointments from "../components/appointments/Appointments";
 import NewConsultation from "../components/appointments/NewConsultation";
 import HealthInformation from "../components/healthInformation/HealthInformation";
+import createAxiosInstance from "../features/axios";
+import VideoCall from "../components/appointments/VideoCall";
 
 export default function Dashboard() {
   const page = useSelector((state) => state.sharedData.page);
   const [isOpen, setIsOpen] = useState(true);
+  const instance = createAxiosInstance();
   const isScreenWidth767 = () => {
     return window.innerWidth;
   };
@@ -25,7 +28,7 @@ export default function Dashboard() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
+  
   return (
     <div className="flex">
       <SideBar isOpen={isOpen} toggleSidebar={toggleSidebar}/>
@@ -35,6 +38,7 @@ export default function Dashboard() {
         {page === "appointments" && <Appointments />}
         {page === "new consultation" && <NewConsultation />}
         {page === "health information" && <HealthInformation />}
+        {page === "call" && <VideoCall />}
       </div>
     </div>
   );

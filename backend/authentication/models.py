@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
+from datetime import datetime
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -148,20 +149,6 @@ class DoctorProfile(models.Model):
     def __str__(self):
         return f"Dr. {self.user.first_name}"
     
-class Allergy(models.Model):
-    """
-    Model representing an allergy.
-
-    Attributes:
-        id (Integer): The primary key and unique identifier of the allergy.
-        name (String): The name of the allergy.
-        created_at (DateTime): The date and time when the allergy was created.
-    """
-    name = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
 
 class PatientProfile(models.Model):
     """
@@ -182,15 +169,37 @@ class PatientProfile(models.Model):
     height = models.FloatField(blank=True, null=True)
     blood_glucose = models.FloatField(blank=True, null=True)
     blood_pressure = models.FloatField(blank=True, null=True)
-    allergies = models.ManyToManyField(
-        Allergy,
-        related_name='user',
-        blank=True,
-        help_text=_('Specific allergies for this patient.'),
-        verbose_name=_('allergies'),
-    )
+    allergies = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+    
+    height_updated_at = models.DateTimeField(null=True, blank=True)
+    weight_updated_at = models.DateTimeField(null=True, blank=True)
+    blood_glucose_updated_at = models.DateTimeField(null=True, blank=True)
+    blood_pressure_updated_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        now = datetime.now()
+        if self.pk:
+            old = PatientProfile.objects.get(pk=self.pk)
+            if old.height != self.height:
+                self.height_updated_at = now
+            if old.weight != self.weight:
+                self.weight_updated_at = now
+            if old.blood_glucose != self.blood_glucose:
+                self.blood_glucose_updated_at = now
+            if old.blood_pressure != self.blood_pressure:
+                self.blood_pressure_updated_at = now
+        else:
+            # When creating a new instance, set the timestamp fields to the current time
+            now = now
+            self.height_updated_at = now if self.height else None
+            self.weight_updated_at = now if self.weight else None
+            self.blood_glucose_updated_at = now if self.blood_glucose else None
+            self.blood_pressure_updated_at = now if self.blood_pressure else None
+
+        super(PatientProfile, self).save(*args, **kwargs)
+
     

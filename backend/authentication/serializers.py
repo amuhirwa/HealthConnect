@@ -83,12 +83,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AllergySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Allergy
-        fields = ['id', 'name']
-
-
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
 
@@ -102,19 +96,41 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'name', 'phone']
 
 
-class PatientProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    allergies = AllergySerializer(many=True)
-
-
-    class Meta:
-        model = PatientProfile
-        fields = ['id', 'user', 'weight', 'height', 'blood_glucose', 'blood_pressure', 'allergies']
-
-
 class DoctorProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = DoctorProfile
         fields = ['id', 'user', 'specialization', 'available']
+
+def calculate_age(dob):
+    # Ensure dob is a datetime object, if not, parse it from a string
+    if isinstance(dob, str):
+        dob = datetime.strptime(dob, "%Y-%m-%d")
+    
+    today = datetime.today()
+    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    
+    return age
+
+class PatientProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    age = serializers.SerializerMethodField()
+
+    def get_age(self, obj):
+        return calculate_age(obj.user.dob)
+
+    class Meta:
+        model = PatientProfile
+        fields = ['id', 'user', 'age', 'weight', 'height', 'blood_glucose', 'blood_pressure', 'allergies']
+        read_only_fields = ['age']
+
+    def update(self, instance, validated_data):
+        """
+        Update and return an existing `PatientProfile` instance, given the validated data.
+        """
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

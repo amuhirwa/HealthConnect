@@ -94,7 +94,9 @@ def register(request):
             dob=user_data['dob'],
         )
         new_user.set_password(user_data['password'])
-        
+        patient_profile = PatientProfile.objects.create(user=new_user)
+
+        patient_profile.save()
         new_user.save()
 
         # current_site = get_current_site(request)
@@ -132,3 +134,51 @@ def change_availability(request):
     doctor.save()
 
     return Response({'message': 'Availability changed successfully'}, status=200)
+
+@api_view(['GET', 'OPTIONS'])
+@permission_classes([IsAuthenticated])
+def get_health_metrics(request):
+    user = request.user
+
+    metrics = PatientProfile.objects.filter(user=user).first()
+
+    if not metrics:
+        return Response({'error': 'Metrics not found'}, status=404)
+
+    metrics = PatientProfileSerializer(metrics).data
+
+    return Response({'metrics': metrics}, status=200)
+
+
+@api_view(['POST', 'OPTIONS'])
+@permission_classes([IsAuthenticated])
+def update_health_metrics(request):
+    user = request.user
+    metrics = PatientProfile.objects.filter(user=user).first()
+    if not metrics:
+        metrics = PatientProfile.objects.create(user=user)
+
+    print(request.data)
+    serializer = PatientProfileSerializer(metrics, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Metrics updated successfully'}, status=200)
+    return Response(serializer.errors, status=400)
+
+@api_view(['GET', 'OPTIONS'])
+@permission_classes([IsAuthenticated])
+def get_profile(request):
+    user = request.user
+    print('user', user)
+    if user.user_role == UserRoleChoices.health_professional:
+        doctor = DoctorProfile.objects.filter(user=user).first()
+        if not doctor:
+            return Response({'error': 'Doctor profile not found'}, status=404)
+        doctor = DoctorProfileSerializer(doctor).data
+        return Response({'doctor': doctor}, status=200)
+    else:
+        patient = PatientProfile.objects.filter(user=user).first()
+        if not patient:
+            return Response({'error': 'Patient profile not found'}, status=404)
+        patient = PatientProfileSerializer(patient).data
+        return Response({'patient': patient}, status=200)

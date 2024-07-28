@@ -1,3 +1,4 @@
+/* General styles */
 body {
     margin: 0;
     padding: 0;
@@ -6,6 +7,7 @@ body {
     background-color: #f9f9f9;
 }
 
+/* Header styles */
 .header {
     display: flex;
     justify-content: space-between;
@@ -18,7 +20,7 @@ body {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    color:  #2F4AD6;
+    color: #2F4AD6;
 }
 
 .logo span {
@@ -38,7 +40,7 @@ nav {
 }
 
 .signup {
-    background-color:#2F4AD6;
+    background-color: #2F4AD6;
     color: #fff;
 }
 
@@ -51,6 +53,7 @@ nav {
     padding: 20px;
 }
 
+/* Intro and Signup sections */
 .intro-section,
 .signup-section {
     display: flex;
@@ -87,18 +90,8 @@ nav {
 .btn.signup {
     margin-top: 20px;
 }
-body {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-}
 
-.homepage {
-    padding: 20px;
-}
-
+/* Mission section */
 .mission-section {
     display: flex;
     align-items: center;
@@ -124,6 +117,7 @@ body {
     font-size: 1.2rem;
 }
 
+/* Offerings section */
 .offerings-section {
     text-align: center;
     margin-bottom: 20px;
@@ -132,12 +126,15 @@ body {
 .offerings-section h2 {
     font-size: 1.5rem;
     margin-bottom: 20px;
+  color: #2F4AD6;
 }
 
 .offerings {
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 .offering {
@@ -145,9 +142,10 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 22%;
+    width: 24%;
+    min-width: 200px;
     text-align: center;
-    margin: 10px;
+    flex: 0 0 auto;
 }
 
 .offering img {
@@ -165,23 +163,16 @@ body {
     margin-bottom: 10px;
 }
 
-.btn {
+.offering .btn {
     padding: 10px 20px;
+    background-color: #2F4AD6;
+    color: #fff;
     border: none;
     border-radius: 5px;
-    background-color:  #2F4AD6;
-    color: #fff;
     cursor: pointer;
 }
 
-.offering-btn {
-    background-color:  #2F4AD6;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+/* Stats section */
 .stats-section {
     display: flex;
     justify-content: space-around;
@@ -202,16 +193,20 @@ body {
     margin-bottom: 5px;
 }
 
+/* Team section */
 .team-section {
     text-align: center;
     margin-bottom: 20px;
+}
+.team-section h2 {
+  color: #2F4AD6;
 }
 
 .team {
     display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;
 }
+
 
 .team-member {
     background-color: #fff;
@@ -230,6 +225,7 @@ body {
     margin-bottom: 10px;
 }
 
+/* Footer section */
 .footer {
     background-color: #fff;
     padding: 20px;
@@ -252,7 +248,7 @@ body {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color:  #2F4AD6;
+    background-color: #2F4AD6;
     color: #fff;
     cursor: pointer;
 }
@@ -264,5 +260,5 @@ body {
 .footer-nav a {
     margin: 0 10px;
     text-decoration: none;
-    color:  #2F4AD6;
+    color: #2F4AD6;
 }

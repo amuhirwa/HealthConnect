@@ -29,13 +29,14 @@ body {
 
 nav {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
 }
 
 .btn {
     padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 5px 5px;
     cursor: pointer;
 }
 
@@ -45,8 +46,8 @@ nav {
 }
 
 .login {
-    background-color: #fff;
-    color: #2F4AD6;
+    background-color: #2F4AD6;
+    color: #fff;
 }
 
 .homepage {
@@ -99,7 +100,7 @@ nav {
 }
 
 .mission-image {
-    width: 50%;
+    width: 25%;
     border-radius: 10px;
 }
 
@@ -142,8 +143,8 @@ nav {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 24%;
-    min-width: 200px;
+    width: 20%;
+    min-width: 190px;
     text-align: center;
     flex: 0 0 auto;
 }
@@ -185,7 +186,10 @@ nav {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 22%;
+    width: 20%;
+    min-width: 190px;
+    text-align: center;
+    flex: 0 0 auto;
 }
 
 .stat h3 {

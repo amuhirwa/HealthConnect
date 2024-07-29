@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@mui/icons-material": "^5.16.5",
+    "@mui/material": "^5.16.5",
+    "@mui/styled-engine-sc": "6.0.0-alpha.18",
     "@mui/x-charts": "^7.11.1",
     "@reduxjs/toolkit": "^2.2.6",
     "@stomp/stompjs": "^7.0.0",

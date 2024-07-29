@@ -4,7 +4,11 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   usersLogin: [],
   page: "dashboard",
-  profile: {},
+  profile: {
+    patient: {
+      user: {},
+    }
+  },
   callId: {},
   matchedDoctor: null,
 };

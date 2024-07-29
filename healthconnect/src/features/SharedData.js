@@ -5,7 +5,8 @@ const initialState = {
   usersLogin: [],
   page: "dashboard",
   profile: {},
-  callId: null,
+  callId: {},
+  matchedDoctor: null,
 };
 
 const sharedDataSlice = createSlice({
@@ -32,6 +33,12 @@ const sharedDataSlice = createSlice({
     resetCallId: (state, action) => {
       state.callId = null;
     },
+    addMatchedDoctor: (state, action) => {
+      state.matchedDoctor = action.payload;
+    },
+    resetMatchedDoctor: (state, action) => {
+      state.matchedDoctor = null;
+    },
     resetStateToDefault: (state, action) => {
       // Reset state to initial values
       state.usersLogin = [];
@@ -46,6 +53,8 @@ export const {
   addProfile,
   addCallId,
   resetCallId,
+  addMatchedDoctor,
+  resetMatchedDoctor,
   updateProfile,
   resetStateToDefault,
 } = sharedDataSlice.actions;

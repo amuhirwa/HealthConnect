@@ -8,11 +8,9 @@ import { store, persistor } from './app/store'; // Import both store and persist
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={"loading"} persistor={persistor}>
         <App />
       </PersistGate>
     </Provider>
-  </React.StrictMode>
 );

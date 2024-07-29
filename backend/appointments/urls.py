@@ -8,4 +8,10 @@ urlpatterns = [
     path('get_past_appointments', views.get_past_appointments, name="get_past_appointments"),
     path('create_appointment', views.create_appointment, name="create_appointment"),
     path('<int:id>/cancel', views.cancel_appointment, name="cancel_appointment"),
+    path('update_appointment', views.update_appointment, name="update_appointment"),
+    path('join_call', views.join_call, name="join_call"),
+    path('create_prescription', views.create_prescription, name="create_prescription"),
+    path('create_report', views.create_report, name="create_report"),
+    path('<id>/<token>/invalidate/', views.invalidate_prescription, name="invalidate_prescription"),
+    path('get_appointments/<int:doctor_id>/', views.get_doctor_appointments, name='get_doctor_appointments'),
 ]

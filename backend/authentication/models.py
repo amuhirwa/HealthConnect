@@ -168,12 +168,19 @@ class PatientProfile(models.Model):
     weight = models.FloatField(blank=True, null=True)
     height = models.FloatField(blank=True, null=True)
     blood_glucose = models.FloatField(blank=True, null=True)
-    blood_pressure = models.FloatField(blank=True, null=True)
+    blood_pressure = models.TextField(blank=True, null=True)
     allergies = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+    
+    @property
+    def bmi(self):
+        if self.height and self.weight:
+            return self.weight / ((self.height / 100) ** 2)
+        return None
+
     
     height_updated_at = models.DateTimeField(null=True, blank=True)
     weight_updated_at = models.DateTimeField(null=True, blank=True)
@@ -202,4 +209,33 @@ class PatientProfile(models.Model):
 
         super(PatientProfile, self).save(*args, **kwargs)
 
-    
+class PastMetrics(models.Model):
+    """
+    Model representing a past metrics.
+
+    Attributes:
+        id (Integer): The primary key and unique identifier of the past metrics.
+        user (Relationship): Foreign key referencing the User.
+        height (Float): The height of the patient.
+        weight (Float): The weight of the patient.
+        blood_glucose (Float): The blood glucose level of the patient.
+        blood_pressure (Float): The blood pressure of the patient.
+        created_at (DateTime): The date and time when the patient profile was created.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    height = models.FloatField(blank=True, null=True)
+    weight = models.FloatField(blank=True, null=True)
+    blood_glucose = models.FloatField(blank=True, null=True)
+    blood_pressure = models.TextField(blank=True, null=True)
+    updated_field = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def bmi(self):
+        if self.height and self.weight:
+            return self.weight / ((self.height / 100) ** 2)
+        return None
+
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"

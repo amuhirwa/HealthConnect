@@ -93,8 +93,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'phone']
+        fields = ['id', 'email', 'name', 'phone', 'user_role']
 
+
+class PastMetricsSerializer(serializers.ModelSerializer):
+    bmi = serializers.ReadOnlyField()
+
+    class Meta:
+        model = PastMetrics
+        fields = ['id', 'bmi', 'height', 'weight', 'blood_glucose', 'blood_pressure', 'created_at', 'updated_field']
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -117,13 +124,14 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     age = serializers.SerializerMethodField()
+    bmi = serializers.ReadOnlyField()
 
     def get_age(self, obj):
         return calculate_age(obj.user.dob)
 
     class Meta:
         model = PatientProfile
-        fields = ['id', 'user', 'age', 'weight', 'height', 'blood_glucose', 'blood_pressure', 'allergies']
+        fields = ['id', 'user', 'age', 'weight', 'height', 'bmi', 'blood_glucose', 'blood_pressure', 'allergies']
         read_only_fields = ['age']
 
     def update(self, instance, validated_data):

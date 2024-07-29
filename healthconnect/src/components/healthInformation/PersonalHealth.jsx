@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
@@ -7,11 +7,26 @@ import createAxiosInstance from "../../features/axios";
 import { useDispatch } from "react-redux";
 import { updateProfile } from "../../features/SharedData";
 
-export default function PersonalHealth({ metrics }) {
+export default function PersonalHealth() {
+  const instance = createAxiosInstance();
+  const [metrics, setMetrics] = useState({}); // Initialize with an empty object
   const [editableMetric, setEditableMetric] = useState({});
   const [editedValues, setEditedValues] = useState({});
-  const instance = createAxiosInstance();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await instance.get('/get_health_metrics');
+        setMetrics(res.data.metrics);
+        console.log(res.data);
+      } catch (error) {
+        console.error("Failed to fetch health metrics:", error);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
 
   const handleEditClick = (key) => {
     setEditableMetric((prev) => ({ ...prev, [key]: true }));
@@ -22,24 +37,25 @@ export default function PersonalHealth({ metrics }) {
     setEditedValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSaveClick = (key) => {
+  const handleSaveClick = async (key) => {
     if (key === "blood_pressure") {
-      const pressure_pattern = /^\d{1,3}\/\d{1,3}$/;
-      if (!pressure_pattern.test(editedValues[key])) {
-        console.log(
-          "Invalid blood pressure format. Please enter a value in the format of systolic/diastolic."
-        );
-        toast.error(
-          "Invalid blood pressure format. Please enter a value in the format of systolic/diastolic."
-        );
+      const pressurePattern = /^\d{1,3}\/\d{1,3}$/;
+      if (!pressurePattern.test(editedValues[key])) {
+        toast.error("Invalid blood pressure format. Please enter a value in the format of systolic/diastolic.");
         return;
       }
     }
-    metrics[key] = editedValues[key];
-    instance.post("/update_health_metrics", { [key]: editedValues[key] })
-    .then((response) => {
+
+    try {
+      await instance.post("/update_health_metrics", { [key]: editedValues[key] });
+      setMetrics((prev) => ({ ...prev, [key]: editedValues[key] }));
       dispatch(updateProfile({ [key]: editedValues[key] }));
-    })
+      toast.success("Metrics updated successfully!");
+    } catch (error) {
+      console.error("Failed to update health metrics:", error);
+      toast.error("Failed to update metrics. Please try again.");
+    }
+
     setEditableMetric((prev) => ({ ...prev, [key]: false }));
   };
 
@@ -89,18 +105,8 @@ export default function PersonalHealth({ metrics }) {
   ];
 
   const healthMetrics = [
-    {
-      label: "Blood Glucose",
-      key: "blood_glucose",
-      unit: "mg/dL",
-      editable: true,
-    },
-    {
-      label: "Blood Pressure",
-      key: "blood_pressure",
-      unit: "mmHg",
-      editable: true,
-    },
+    { label: "Blood Glucose", key: "blood_glucose", unit: "mg/dL", editable: true },
+    { label: "Blood Pressure", key: "blood_pressure", unit: "mmHg", editable: true },
     { label: "Past Diagnoses", key: "past_diagnoses", isButton: true },
     { label: "Known Allergies", key: "known_allergies", isButton: true },
   ];
@@ -108,9 +114,7 @@ export default function PersonalHealth({ metrics }) {
   return (
     <div className="mx-4 flex flex-col gap-6 w-[40%] max-w-lg bg-white p-6 pb-3 rounded-lg shadow-lg">
       <div className="per-info flex flex-col gap-4">
-        <span className="text-xl font-semibold text-blue-600">
-          Personal Info
-        </span>
+        <span className="text-xl font-semibold text-blue-600">Personal Info</span>
         <div className="info flex flex-col gap-3 text-sm">
           {personalInfo.map((info) =>
             renderInfo(info.label, info.key, info.unit, info.editable)
@@ -119,9 +123,7 @@ export default function PersonalHealth({ metrics }) {
       </div>
 
       <div className="health-metrics flex flex-col gap-4">
-        <span className="text-xl font-semibold text-blue-600">
-          Health Metrics
-        </span>
+        <span className="text-xl font-semibold text-blue-600">Health Metrics</span>
         <div className="info flex flex-col gap-3 text-sm">
           {healthMetrics.map((info) => (
             <div
@@ -139,13 +141,9 @@ export default function PersonalHealth({ metrics }) {
                     <input
                       type="text"
                       value={editedValues[info.key]}
-                      onChange={(e) =>
-                        handleInputChange(info.key, e.target.value)
-                      }
+                      onChange={(e) => handleInputChange(info.key, e.target.value)}
                       className="border rounded px-2 py-1"
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && handleSaveClick(info.key)
-                      }
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveClick(info.key)}
                     />
                   ) : (
                     <span>

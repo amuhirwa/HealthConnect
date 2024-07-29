@@ -4,11 +4,20 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useSelector, useDispatch } from "react-redux";
 import { resetStateToDefault } from "../../features/SharedData";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { firestore } from "../../../main";
 
-export default function TopBar({ isOpen, toggleSidebar }) {
+export default function TopBar({
+  isOpen,
+  toggleSidebar,
+  notificationOpen,
+  setNotificationOpen,
+}) {
   const [open, setOpen] = useState(false);
+  const [notificationsCount, setNotificationsCount] = useState(0);
   const dropdownRef = useRef(null);
-  const user = useSelector((state) => state.sharedData.profile);
+  const user = useSelector((state) => state.sharedData.profile.patient.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,6 +39,17 @@ export default function TopBar({ isOpen, toggleSidebar }) {
     };
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = firestore.collection("notifications")
+      .where("userId", "==", user?.id)
+      .where("read", "==", false)
+      .onSnapshot((snapshot) => {
+        setNotificationsCount(snapshot.size);
+      });
+
+    return () => unsubscribe();
+  }, [user?.id]);
+
   return (
     <div className="topBar flex items-center w-full justify-between shadow-md bg-white sticky top-0 z-10 sm:px-4">
       <div className="flex items-center gap-2">
@@ -46,39 +66,52 @@ export default function TopBar({ isOpen, toggleSidebar }) {
           </span>
         )}
       </div>
-      <div
-        className="relative hover:bg-gray-200 p-3 rounded-md"
-        ref={dropdownRef}
-      >
+      <div className="flex items-center">
         <div
-          className="flex items-center cursor-pointer"
-          onClick={() => setOpen(!open)}
+          className="relative hover:bg-gray-200 p-3 rounded-md"
+          ref={dropdownRef}
         >
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            alt="Avatar"
-            className="w-10 rounded-full"
-          />
-          {user && user.patient && user.patient.user && (
-            <span className="ml-2 hidden sm:block">
-              {user.patient.user.name}
-            </span>
-          )}
-          <ArrowDropDownIcon />
-        </div>
-        {open && (
-          <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md">
-            <div className="px-4 py-2 cursor-pointer hover:bg-gray-100 hover:rounded-md">
-              Profile
-            </div>
-            <div className="px-4 py-2 cursor-pointer hover:bg-gray-100">
-              Settings
-            </div>
-            <div onClick={handleLogout} className="px-4 py-2 cursor-pointer hover:bg-gray-100 hover:rounded-md">
-              Logout
-            </div>
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => setOpen(!open)}
+          >
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              alt="Avatar"
+              className="w-10 rounded-full"
+            />
+            {user && (
+              <span className="ml-2 hidden sm:block">
+                {user.name}
+              </span>
+            )}
+            <ArrowDropDownIcon />
           </div>
-        )}
+          {open && (
+            <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md">
+              <div className="px-4 py-2 cursor-pointer hover:bg-gray-100 hover:rounded-md">
+                Profile
+              </div>
+              <div className="px-4 py-2 cursor-pointer hover:bg-gray-100">
+                Settings
+              </div>
+              <div
+                onClick={handleLogout}
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100 hover:rounded-md"
+              >
+                Logout
+              </div>
+            </div>
+          )}
+        </div>
+        <div
+          className="badge mr-8 sm:mr-2 hover:text-[#2F4AD6] transition"
+          onClick={() => setNotificationOpen(!notificationOpen)}
+        >
+          <Badge color="primary" badgeContent={notificationsCount}>
+            <NotificationsIcon sx={{ cursor: "pointer", fontSize: 30 }} />
+          </Badge>
+        </div>
       </div>
     </div>
   );

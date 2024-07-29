@@ -1,27 +1,26 @@
 import { firestore, pc } from "../../main";
-import { addCallId } from "./SharedData";
 import createAxiosInstance from "./axios";
 
-
 const createCall = async (data) => {
+    const instance = createAxiosInstance();
     const callDoc = firestore.collection("calls").doc();
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
 
-    console.log(callDoc.id);
+    console.log("Creating call with ID:", callDoc.id);
+
 
     pc.onicecandidate = (event) => {
         if (event.candidate) {
+            console.log("New ICE candidate:", event.candidate);
             offerCandidates.add(event.candidate.toJSON());
         } else {
-            console.log("End of candidates.");
+            console.log("End of ICE candidates.");
         }
     };
 
     const offerDescription = await pc.createOffer();
     await pc.setLocalDescription(offerDescription);
-
-    console.log(offerDescription.sdp);
 
     const offer = {
         sdp: offerDescription.sdp,
@@ -33,6 +32,7 @@ const createCall = async (data) => {
     callDoc.onSnapshot((snapshot) => {
         const data = snapshot.data();
         if (!pc.currentRemoteDescription && data?.answer) {
+            console.log("Setting remote description with answer:", data.answer);
             pc.setRemoteDescription(new RTCSessionDescription(data.answer));
         }
     });
@@ -40,36 +40,46 @@ const createCall = async (data) => {
     answerCandidates.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
-                let candidate = new RTCIceCandidate(change.doc.data());
-                pc.addIceCandidate(candidate);
+                console.log("Got new remote ICE candidate: ", change.doc.data());
+                let candidateData = change.doc.data();
+                if (candidateData && candidateData.sdpMid !== null && candidateData.sdpMLineIndex !== null && Object.keys(candidateData).length > 0) {
+                    console.log(candidateData);
+                    let candidate = new RTCIceCandidate(candidateData);
+                    console.log("Adding answer candidate:", candidate);
+                    pc.addIceCandidate(candidate).catch((e) => {
+                        console.error("Error adding ICE candidate: ", e);
+                    });
+                } else {
+                    console.error("Invalid ICE candidate data:", candidateData);
+                }
             }
         });
     });
-    console.log('done with create')
-    return callDoc.id
+
+    return callDoc.id;
 };
 
 const answerCall = async (callId) => {
-    console.log(callId);
+    console.log("Answering call with ID:", callId);
     const callDoc = firestore.collection("calls").doc(callId);
     const answerCandidates = callDoc.collection("answerCandidates");
     const offerCandidates = callDoc.collection('offerCandidates');
 
     pc.onicecandidate = (event) => {
-        event.candidate && answerCandidates.add(event.candidate.toJSON());
+        if (event.candidate) {
+            console.log("Adding answer candidate:", event.candidate);
+            answerCandidates.add(event.candidate.toJSON());
+        } else {
+            console.log("End of answer candidates.");
+        }
     };
 
     const callData = (await callDoc.get()).data();
-
     const offerDescription = callData.offer;
     await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
-    console.log('offerDescription',offerDescription)
 
     const answerDescription = await pc.createAnswer();
-    console.log('answerDescription',answerDescription)
     await pc.setLocalDescription(answerDescription);
-
-    console.log(answerDescription.sdp);
 
     const answer = {
         type: answerDescription.type,
@@ -81,15 +91,21 @@ const answerCall = async (callId) => {
     offerCandidates.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
-                let candidate = new RTCIceCandidate(change.doc.data());
-                pc.addIceCandidate(candidate);
+                let candidateData = change.doc.data();
+                if (candidateData && candidateData.sdpMid !== null && candidateData.sdpMLineIndex !== null && Object.keys(candidateData).length > 0) {
+                    let candidate = new RTCIceCandidate(candidateData);
+                    console.log("Adding offer candidate:", candidate);
+                    pc.addIceCandidate(candidate).catch((e) => {
+                        console.error("Error adding ICE candidate: ", e);
+                    });
+                } else {
+                    console.error("Invalid ICE candidate data:", candidateData);
+                }
             }
         });
     });
-    useDispatch((dispatch) => {
-        dispatch(addCallId(callDoc.id));
-    });
 
+    return callDoc.id;
 };
 
 export { createCall, answerCall };

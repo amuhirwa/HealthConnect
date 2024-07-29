@@ -5,13 +5,17 @@ import { useState } from "react";
 import { createCall } from "../../features/call";
 import { useDispatch } from "react-redux";
 import { addCallId, changepage } from "../../features/SharedData";
+import { useEffect } from "react";
+import JoinCall from "./JoinCall";
+import { useSelector } from "react-redux";
 
 export default function RandomMatch() {
-  const { polling, setPolling, selectedSpecialty, setSelectedSpecialty, matchedDoctor, setMatchedDoctor } = usePolling();
+  const { polling, setPolling, selectedSpecialty, setSelectedSpecialty, matchedDoctor, setMatchedDoctor, doctorInfo, setDoctorInfo } = usePolling();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const specialties = ["General", "Dermatology", "Cardiology"];
   const dispatch = useDispatch();
+  const patient = useSelector((state) => state.sharedData.profile.patient.user)
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -19,6 +23,10 @@ export default function RandomMatch() {
     setSelectedSpecialty(specialty);
     setDropdownOpen(false);
   };
+
+  useEffect(() => {
+    setLoading(false);
+  }, [matchedDoctor]);
 
   const handleMatch = () => {
     setLoading(true);
@@ -84,12 +92,7 @@ export default function RandomMatch() {
               <p className="text-gray-600">{matchedDoctor.specialty}</p>
             </div>
           </div>
-          <button
-            className="w-full py-3 px-4 mb-4 text-[green] border border-[green] rounded-md hover:bg-green-700 hover:text-white transition-all flex justify-center items-center"
-            onClick={async () => {const callId = await createCall(''); dispatch(addCallId(callId)); dispatch(changepage('call'));}}
-          >
-            Join Call
-          </button>
+          <JoinCall doctor={doctorInfo} patient={patient} />
           <button
             className="w-full py-3 px-4 text-[red] border border-[red] rounded-md hover:bg-red-500 hover:text-white transition-all flex justify-center items-center"
             onClick={handleRetry}

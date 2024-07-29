@@ -94,10 +94,10 @@ def register(request):
             dob=user_data['dob'],
         )
         new_user.set_password(user_data['password'])
+        new_user.save()
         patient_profile = PatientProfile.objects.create(user=new_user)
 
         patient_profile.save()
-        new_user.save()
 
         # current_site = get_current_site(request)
         # subject = "Welcome to HealthConnect"
@@ -141,24 +141,34 @@ def get_health_metrics(request):
     user = request.user
 
     metrics = PatientProfile.objects.filter(user=user).first()
+    past_metrics = PastMetricsSerializer(PastMetrics.objects.filter(user=user).all(), many=True).data
 
     if not metrics:
         return Response({'error': 'Metrics not found'}, status=404)
 
     metrics = PatientProfileSerializer(metrics).data
 
-    return Response({'metrics': metrics}, status=200)
+    return Response({'metrics': metrics, 'past_metrics': past_metrics}, status=200)
 
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
 def update_health_metrics(request):
     user = request.user
-    metrics = PatientProfile.objects.filter(user=user).first()
+    metrics, created = PatientProfile.objects.get_or_create(user=user)
+    print(request.data)
     if not metrics:
         metrics = PatientProfile.objects.create(user=user)
 
-    print(request.data)
+
+    PastMetrics.objects.create(
+        user=user,
+        weight=metrics.weight,
+        height=metrics.height,
+        blood_pressure=metrics.blood_pressure,
+        blood_glucose=metrics.blood_glucose,
+        updated_field=list(request.data.keys())[0]
+    )
     serializer = PatientProfileSerializer(metrics, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
@@ -175,7 +185,7 @@ def get_profile(request):
         if not doctor:
             return Response({'error': 'Doctor profile not found'}, status=404)
         doctor = DoctorProfileSerializer(doctor).data
-        return Response({'doctor': doctor}, status=200)
+        return Response({'patient': doctor}, status=200)
     else:
         patient = PatientProfile.objects.filter(user=user).first()
         if not patient:

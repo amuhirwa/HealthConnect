@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import createAxiosInstance from "../../features/axios";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import JoinCall from "./JoinCall";
+import { useSelector, useDispatch } from "react-redux";
+import { changepage } from "../../features/SharedData";
 
-export default function AvailableDoctors() {
+export default function AvailableDoctors({selectedFutureDoctor, setSelectedFutureDoctor}) {
   const [immediateSearchTerm, setImmediateSearchTerm] = useState("");
   const [futureSearchTerm, setFutureSearchTerm] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [selectedFutureDoctor, setSelectedFutureDoctor] = useState(null);
   const [doctorsData, setDoctorsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -14,6 +16,8 @@ export default function AvailableDoctors() {
   const instance = createAxiosInstance();
   const selectedDoctorRef = useRef(null);
   const selectedDoctorFutureRef = useRef(null);
+  const patient = useSelector((state) => state.sharedData.profile.patient.user)
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -102,7 +106,7 @@ export default function AvailableDoctors() {
                 >
                   <img
                     src={
-                      doctor.imageUrl ||
+                      doctor.user.profile_pic ||
                       "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                     }
                     alt={doctor.user.name}
@@ -124,7 +128,7 @@ export default function AvailableDoctors() {
             <h2 className="text-base font-bold mb-4">Selected Doctor</h2>
             <div className="flex items-center mb-4">
               <img
-                src={selectedDoctor.imageUrl}
+                src={selectedDoctor.user.profile_pic || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                 alt={selectedDoctor.user.name}
                 className="w-16 h-16 rounded-full mr-4"
               />
@@ -135,30 +139,7 @@ export default function AvailableDoctors() {
                 <p className="text-gray-600">{selectedDoctor.specialization}</p>
               </div>
             </div>
-            <button
-              className={`w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all flex justify-center items-center ${
-                buttonLoading ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              onClick={() => {
-                setButtonLoading(true);
-                setTimeout(() => {
-                  alert(
-                    `Scheduling appointment with ${selectedDoctor.user.name}...`
-                  );
-                  setButtonLoading(false);
-                }, 2000);
-              }}
-              disabled={buttonLoading}
-            >
-              {buttonLoading ? (
-                <>
-                  <AiOutlineLoading3Quarters className="animate-spin mr-2" />
-                  Loading...
-                </>
-              ) : (
-                "Request Consultation"
-              )}
-            </button>
+            <JoinCall doctor={selectedDoctor} patient={patient} />
           </div>
         )}
       </div>
@@ -193,7 +174,7 @@ export default function AvailableDoctors() {
                 >
                   <img
                     src={
-                      doctor.imageUrl ||
+                      doctor.user.profile_pic ||
                       "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                     }
                     alt={doctor.user.name}
@@ -215,7 +196,7 @@ export default function AvailableDoctors() {
             <h2 className="text-base font-bold mb-4">Selected Doctor</h2>
             <div className="flex items-center mb-4">
               <img
-                src={selectedFutureDoctor.imageUrl}
+                src={selectedFutureDoctor.user.profile_pic || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                 alt={selectedFutureDoctor.user.name}
                 className="w-16 h-16 rounded-full mr-4"
               />
@@ -233,14 +214,9 @@ export default function AvailableDoctors() {
                 buttonLoading ? "cursor-not-allowed opacity-50" : ""
               }`}
               onClick={() => {
-                setButtonLoading(true);
-                setTimeout(() => {
-                  alert(
-                    `Scheduling appointment with ${selectedFutureDoctor.user.name}...`
-                  );
-                  setButtonLoading(false);
-                }, 2000);
-              }}
+                dispatch(
+                  changepage("doctor schedule")
+                )}}
               disabled={buttonLoading}
             >
               {buttonLoading ? (

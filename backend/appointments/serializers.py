@@ -2,13 +2,21 @@ from rest_framework import serializers
 from .models import *
 from authentication.serializers import PatientProfileSerializer, DoctorProfileSerializer
 
+class PrescriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Prescription
+        fields = ['id', 'prescription', 'dosage', 'description', 'valid', 'unique_link', 'created_at']
+
+
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = PatientProfileSerializer()
     doctor = DoctorProfileSerializer()
+    prescription = PrescriptionSerializer()
 
     class Meta:
         model = Appointment
-        fields = ['id', 'start', 'call_id', 'report', 'diagnosis', 'patient', 'doctor', 'completed', 'cancelled', 'created_at']
+        fields = ['id', 'prescription', 'start', 'call_id', 'report', 'diagnosis', 'patient', 'doctor', 'completed', 'cancelled', 'created_at']
 
     def update(self, instance, validated_data):
         """
@@ -19,9 +27,3 @@ class AppointmentSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class PrescriptionSerializer(serializers.ModelSerializer):
-    appointment = AppointmentSerializer()
-
-    class Meta:
-        model = Prescription
-        fields = ['id', 'appointment', 'description', 'created_at']

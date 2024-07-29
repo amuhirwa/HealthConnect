@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, useCallback, useContext, useRef } from "react";
 import createAxiosInstance from "../../features/axios";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { firestore } from "../../../main";
 
 const PollingContext = createContext();
 
@@ -8,8 +10,30 @@ export function PollingProvider({ children }) {
   const [polling, setPolling] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [matchedDoctor, setMatchedDoctor] = useState(null);
+  const [doctorInfo, setDoctorInfo] = useState(null);
   const [notified, setNotified] = useState(false);
   const instance = createAxiosInstance();
+  const userId = useSelector(state => state.sharedData.profile.patient.user.id);
+
+  const saveNotification = async (userName, doctor) => {
+    const notificationData = {
+      type: "match",
+      userId: userId,
+      read: false,
+      doctor: doctor,
+      patient: userId,
+      message: `Matched with ${userName}`,
+      created: new Date().toISOString(),
+    };
+
+    try {
+      await firestore.collection("notifications").add(notificationData);
+      console.log("Notification saved successfully");
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  };
+
 
   const fetchRandomMatch = useCallback(() => {
     if (!selectedSpecialty) return;
@@ -22,7 +46,9 @@ export function PollingProvider({ children }) {
           specialty: response.data.specialization || "General Practitioner",
           imageUrl: response.data.user.profile_pic || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
         });
+        setDoctorInfo(response.data);
         toast.success("Doctor found!");
+        saveNotification(response.data.user.name, response.data);
         setPolling(false);
       })
       .catch((error) => {
@@ -50,7 +76,7 @@ export function PollingProvider({ children }) {
   }, [polling, fetchRandomMatch]);
 
   return (
-    <PollingContext.Provider value={{ polling, setPolling, selectedSpecialty, setSelectedSpecialty, matchedDoctor, setMatchedDoctor }}>
+    <PollingContext.Provider value={{ polling, setPolling, selectedSpecialty, setSelectedSpecialty, matchedDoctor, setMatchedDoctor, doctorInfo  }}>
       {children}
     </PollingContext.Provider>
   );

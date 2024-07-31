@@ -3,8 +3,13 @@ import * as Yup from "yup";
 import CreateAxiosInstance from "../../features/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export default function Register() {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const instance = CreateAxiosInstance();
 
   const formik = useFormik({
@@ -36,10 +41,13 @@ export default function Register() {
         .required("Required"),
     }),
     onSubmit: (values) => {
+      setLoading(true);
       instance
         .post("/register", values)
         .then((response) => {
-          console.log(response);
+          toast.success("Account created successfully");
+          setLoading(false);
+          navigate("/login");
         })
     },
   });
@@ -168,7 +176,7 @@ export default function Register() {
         </div>
       </form>
       <div className="terms text-center mt-[3vh]">
-        <input type="checkbox" name="agree" id="agree" className="" /> I
+        <input required type="checkbox" name="agree" id="agree" className="" /> I
         agree to the{" "}
         <a className="text-[#2F4AD6]" href="/terms">
           Terms and Conditions.
@@ -179,7 +187,7 @@ export default function Register() {
         type="submit"
         form="form"
       >
-        Sign Up
+        {loading ? <AiOutlineLoading3Quarters className="animate-spin text-2xl mx-auto" /> : "Sign Up"}
       </button>
       <p className="text-center">
         Already have an account?{" "}

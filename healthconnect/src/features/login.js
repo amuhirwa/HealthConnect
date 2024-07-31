@@ -12,8 +12,15 @@ export const loginUser = createAsyncThunk(
       if (response.data) {
         dispatch(addUserLogin(response.data));
 
-        const profileResponse = await instance.get('/get_profile');
-        dispatch(addProfile(profileResponse.data));
+        const profileResponse = await instance.get('/get_profile', {
+          headers: {
+            Authorization: `Bearer ${response.data.access}`,
+          },
+        });
+        if (profileResponse.data) {
+          dispatch(addProfile(profileResponse.data));
+          console.log('Profile added to state');
+        }
 
         return true;
       }

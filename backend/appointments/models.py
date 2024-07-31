@@ -52,6 +52,7 @@ class Prescription(models.Model):
     prescription = models.TextField()
     valid = models.BooleanField(default=True)
     unique_link = models.TextField(blank=True, null=True)
+    refill_request = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

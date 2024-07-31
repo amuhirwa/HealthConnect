@@ -27,7 +27,7 @@ export default function HealthInformation() {
                     // Push data into the respective arrays
                     acc.bmi.push({ date, value: item.bmi });
                     acc.blood_glucose.push({ date, value: item.blood_glucose });
-                    acc.blood_pressure.push({ date, value: item.blood_pressure });
+                    acc.blood_pressure.push({ date, value: item?.blood_pressure?.split('/')[0] });
                     
                     return acc;
                 }, {});

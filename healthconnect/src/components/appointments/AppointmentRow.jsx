@@ -26,6 +26,7 @@ export default function AppointmentRow({
   const [existingPrescription, setExistingPrescription] = useState(null);
   const [existingReport, setExistingReport] = useState(null);
 
+
   useEffect(() => {
     console.log(profile)
     if (appointment.prescription) {
@@ -182,7 +183,7 @@ export default function AppointmentRow({
           </div>
         )}
         {!showUpcoming && profile.user.user_role === "Patient" && (
-          <div className="flex gap-4 mt-2 sm:mt-0" onClick={() => existingPrescription && setIsPrescriptionModalOpen(true)}>
+          <div className={`flex gap-4 mt-2 sm:mt-0 ${!existingPrescription && "hidden"}`} onClick={() => existingPrescription && setIsPrescriptionModalOpen(true)}>
             <div className="report px-3 py-1 text-[#5A6ACF] border border-[#DDE4F0] transition-all cursor-pointer rounded-[5px] bg-[#DDE4F044] hover:bg-blue-200">
               {existingPrescription ? "View Prescription" : ""}
             </div>
@@ -329,10 +330,10 @@ export default function AppointmentRow({
               <label className="block text-sm font-medium text-gray-700">
                 Prescription QR Code
               </label>
-              <QRCode value={appointment.prescription.unique_link} size={128} />
+              <QRCode value={appointment.prescription != null && appointment.prescription.unique_link} size={128} />
               <span className="flex flex-col gap-1 items-center">
                 <p>Or</p>
-                <Link className="text-blue-500 text-center" to={appointment.prescription.unique_link}>{appointment.prescription.unique_link}</Link>
+                <Link className="text-blue-500 text-center" to={appointment.prescription != null && appointment.prescription.unique_link}>{appointment.prescription != null && appointment.prescription.unique_link}</Link>
               </span>
             </div>
           </div>

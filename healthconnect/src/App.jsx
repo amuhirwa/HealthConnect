@@ -8,6 +8,7 @@ import "./App.css";
 import Dashboard from "./pages/Dashboard";
 import { PollingProvider } from "./components/appointments/PollingContext";
 import VideoCall from "./components/appointments/VideoCall";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <PollingProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<div>App</div>} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />

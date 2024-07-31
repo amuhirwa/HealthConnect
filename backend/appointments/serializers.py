@@ -6,7 +6,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Prescription
-        fields = ['id', 'prescription', 'dosage', 'description', 'valid', 'unique_link', 'created_at']
+        fields = ['id', 'prescription', 'dosage', 'description', 'valid', 'unique_link', 'refill_request', 'created_at']
 
 
 class AppointmentSerializer(serializers.ModelSerializer):

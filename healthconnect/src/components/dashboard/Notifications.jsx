@@ -12,18 +12,24 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../../../main";
 import JoinCall from "../appointments/JoinCall";
+import createAxiosInstance from "../../features/axios";
 
 export const Notifications = ({ notificationOpen, setNotificationOpen }) => {
   const [notifications, setNotifications] = useState([]);
   const [readNotifications, setReadNotifications] = useState([]);
   const [read, setRead] = useState(false);
   const user = useSelector((state) => state.sharedData.profile.patient.user);
+  const instance = createAxiosInstance();
   const dispatch = useDispatch();
 
   useEffect(() => {
     let unsubscribe;
     if (notificationOpen) {
-      const q = query(collection(firestore, "notifications"), where("userId", "==", user.id), where("read", "==", false));
+      const q = query(
+        collection(firestore, "notifications"),
+        where("userId", "==", user.id),
+        where("read", "==", false)
+      );
       unsubscribe = onSnapshot(
         q,
         (snapshot) => {
@@ -31,19 +37,17 @@ export const Notifications = ({ notificationOpen, setNotificationOpen }) => {
             id: doc.id,
             ...doc.data(),
           }));
-          // Sort notifications by 'created' timestamp in descending order
           notifs.sort((a, b) => {
             const dateA = new Date(a.created);
             const dateB = new Date(b.created);
             return dateB - dateA;
           });
           setNotifications(notifs);
-          // Track which notifications are read
           const readNotifs = notifs
             .filter((notif) => notif.read)
             .map((notif) => notif.id);
           setReadNotifications(readNotifs);
-          console.log(notifications, user)
+          console.log(notifications, user);
         },
         (error) => {
           console.error("Error fetching notifications:", error);
@@ -69,6 +73,12 @@ export const Notifications = ({ notificationOpen, setNotificationOpen }) => {
     if (!readNotifications.includes(id)) {
       setReadNotifications([...readNotifications, id]);
     }
+  };
+
+  const handleGrantRefill = (notification) => {
+    instance.post("/appointments/grant_refill", {
+      prescription_id: notification.prescription_id,
+    });
   };
 
   const handleDeleteNotification = async (id) => {
@@ -131,9 +141,35 @@ export const Notifications = ({ notificationOpen, setNotificationOpen }) => {
                   {formatTimestamp(notification.created)}
                 </p>
               </div>
-              {(notification.type === "match" || notification.type === "call") && (
+              {notification.type === "refill" && (
                 <div className="flex gap-2 text-sm">
-                  <JoinCall patient={notification.patient} doctor={notification.doctor}  />
+                  <button
+                    className="py-1 px-4 mb-4 text-[green] border border-[green] rounded-md hover:bg-green-700 hover:text-white transition-all flex justify-center items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGrantRefill(notification);
+                    }}
+                  >
+                    Grant Refill
+                  </button>
+                  <button
+                    className="py-1 px-4 mb-4 text-[red] border border-[red] rounded-md hover:bg-red-700 hover:text-white transition-all flex justify-center items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteNotification(notification.id);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              {(notification.type === "match" ||
+                notification.type === "call") && (
+                <div className="flex gap-2 text-sm">
+                  <JoinCall
+                    patient={notification.patient}
+                    doctor={notification.doctor}
+                  />
                   <button
                     className="py-1 px-4 mb-4 text-[red] border border-[red] rounded-md hover:bg-red-700 hover:text-white transition-all flex justify-center items-center"
                     onClick={(e) => {

@@ -94,33 +94,33 @@ def register(request):
             dob=user_data['dob'],
         )
         new_user.set_password(user_data['password'])
+        new_user.is_active = False
         new_user.save()
-        patient_profile = PatientProfile.objects.create(user=new_user)
-
+        patient_profile = PatientProfile(user=new_user)
         patient_profile.save()
 
-        # current_site = get_current_site(request)
-        # subject = "Welcome to HealthConnect"
-        # html_message = render_to_string('new-email.html', {  
-        # 'user': new_user,  
-        # 'domain': current_site.domain,  
-        # 'uid':urlsafe_base64_encode(force_bytes(new_user.pk)),  
-        # 'token':generate_token.make_token(new_user),  
-        # })
-        # plain_message = strip_tags(html_message)
-        # email = EmailMultiAlternatives(
-        #     from_email=settings.EMAIL_HOST_USER,
-        #     to=[new_user.email],
-        #     body=plain_message,
-        #     subject=subject,
-        # )
-        # email.attach_alternative(html_message, 'text/html')
-        # email.send()
+        current_site = get_current_site(request)
+        subject = "Welcome to HealthConnect"
+        html_message = render_to_string('new-email.html', {  
+        'user': new_user,  
+        'domain': current_site.domain,  
+        'uid':urlsafe_base64_encode(force_bytes(new_user.pk)),  
+        'token':generate_token.make_token(new_user),  
+        })
+        plain_message = strip_tags(html_message)
+        email = EmailMultiAlternatives(
+            from_email=settings.EMAIL_HOST_USER,
+            to=[new_user.email],
+            body=plain_message,
+            subject=subject,
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send()
 
         return Response({'message': 'User registered successfully', 'status': 201}, status=201)
 
 @api_view(['POST', 'OPTIONS'])
-@authentication_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def change_availability(request):
     user = request.user
     if user.user_role != UserRoleChoices.health_professional:
@@ -147,6 +147,7 @@ def get_health_metrics(request):
         return Response({'error': 'Metrics not found'}, status=404)
 
     metrics = PatientProfileSerializer(metrics).data
+    print(metrics)
 
     return Response({'metrics': metrics, 'past_metrics': past_metrics}, status=200)
 
@@ -192,3 +193,83 @@ def get_profile(request):
             return Response({'error': 'Patient profile not found'}, status=404)
         patient = PatientProfileSerializer(patient).data
         return Response({'patient': patient}, status=200)
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+@csrf_exempt
+def github_webhook(request):
+    """
+    Handle GitHub webhook events for repository updates.
+
+    Automatically pulls updates from the main branch of the specified repository
+    and triggers background tasks including dependency installation, testing,
+    migrations, and WSGI application reload.
+
+    Returns HTTP responses based on webhook event outcomes.
+    """
+    if request.method == 'POST':
+        repo_path = '/home/healthconnectapp/HealthCare---Telemedicine-Platform'
+        try:
+            repo = git.Repo(repo_path)
+        except git.exc.NoSuchPathError:
+            logging.error(f'No such path: {repo_path}')
+            return HttpResponse('Invalid repository path', status=400)
+        except git.exc.InvalidGitRepositoryError:
+            logging.error(f'Invalid Git repository: {repo_path}')
+            return HttpResponse('Invalid Git repository', status=400)
+        origin = repo.remotes.origin
+        try:
+            origin.fetch()
+            # Checkout the 'main' branch and pull the latest changes
+            if 'main' in repo.heads:
+                repo.heads['main'].checkout()
+            else:
+                repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+            origin.pull()
+        except git.exc.GitCommandError as e:
+            logging.error(f'Git command error: {e}')
+            return HttpResponse('Error during git operations', status=500)
+    
+        Thread(target=background_tasks).start()
+        return HttpResponse('Webhook received', status=200)
+    else:
+        return HttpResponse(status=400)
+
+def background_tasks():
+    """
+    Perform background tasks triggered by GitHub webhook events.
+
+    Tasks include installing dependencies, running tests, executing migrations,
+    and reloading the WSGI application.
+
+    Logs errors encountered during these tasks.
+    """
+    # Install dependencies
+    repo_path = '/home/healthconnectapp/HealthCare---Telemedicine-Platform/backend'
+
+    try:
+        requirements_file = os.path.join(repo_path, 'requirements.txt')
+        subprocess.check_call(['pip', 'install', '-r', requirements_file])
+    except subprocess.CalledProcessError as e:
+        logging.error(f'Error installing dependencies: {e}')
+
+    # Run tests
+    try:
+        manage_py = os.path.join(repo_path, 'manage.py')
+        subprocess.check_call(['python', manage_py, 'test'])
+    except subprocess.CalledProcessError as e:
+        logging.error(f'Test execution failed: {e}')
+
+    try:
+        manage_py = os.path.join(repo_path, 'manage.py')
+        subprocess.check_call(['python', manage_py, 'makemigrations'])
+        subprocess.check_call(['python', manage_py, 'migrate'])
+    except subprocess.CalledProcessError as e:
+        logging.error(f'Migration execution failed: {e}')
+
+    # Reload the WSGI application
+    try:
+        os.system('touch /var/www/healthconnectapp_pythonanywhere_com_wsgi.py')
+    except OSError as e:
+        logging.error(f'Error reloading WSGI application: {e}')

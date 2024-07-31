@@ -1,16 +1,25 @@
 import { useFormik } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/login";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Login() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false); // Add loading state
   const dispatch = useDispatch();
   const goto = useNavigate();
+  const usersLogin = useSelector((state) => state.sharedData);
+  console.log(usersLogin);
+
+  useEffect(() => {
+    if (Object.keys(usersLogin.usersLogin).length > 0) {
+      goto("/dashboard");
+    }
+  }, [])
 
   const formik = useFormik({
     initialValues: {
@@ -24,6 +33,7 @@ export default function Login() {
     onSubmit: async (values) => {
       setLoading(true); // Set loading to true when form is submitting
       try {
+        console.log(values)
         const resultAction = await dispatch(loginUser(values));
         if (loginUser.fulfilled.match(resultAction)) {
           goto("/dashboard");
@@ -41,7 +51,7 @@ export default function Login() {
   return (
     <div>
       <Toaster />
-      <div className="logo my-[4vh] mt-[2vh] text-center sm:text-left">
+      <div className="my-[4vh] mt-[2vh] text-center sm:text-left">
         <span className="text-2xl text-[#12B536] sm:ml-10">
           <span className="text-[#2F4AD6]">Health</span>Connect
         </span>

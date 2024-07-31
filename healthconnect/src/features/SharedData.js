@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 // Default values for shared host
 const initialState = {
@@ -7,14 +7,14 @@ const initialState = {
   profile: {
     patient: {
       user: {},
-    }
+    },
   },
   callId: {},
   matchedDoctor: null,
 };
 
 const sharedDataSlice = createSlice({
-  name: 'HealthConnect',
+  name: "HealthConnect",
   initialState,
   reducers: {
     addUserLogin: (state, action) => {
@@ -31,11 +31,11 @@ const sharedDataSlice = createSlice({
       state.profile.patient = { ...state.profile.patient, ...action.payload };
     },
     addCallId: (state, action) => {
-      console.log(action.payload)
+      console.log(action.payload);
       state.callId = action.payload;
     },
     resetCallId: (state, action) => {
-      state.callId = null;
+      state.callId = {};
     },
     addMatchedDoctor: (state, action) => {
       state.matchedDoctor = action.payload;
@@ -43,10 +43,20 @@ const sharedDataSlice = createSlice({
     resetMatchedDoctor: (state, action) => {
       state.matchedDoctor = null;
     },
+    changeAvailability: (state, action) => {
+      state.profile.patient.available = action.payload;
+    },
     resetStateToDefault: (state, action) => {
       // Reset state to initial values
       state.usersLogin = [];
       state.page = "dashboard";
+      (state.profile = {
+        patient: {
+          user: {},
+        },
+      }),
+        (state.callId = {});
+      state.matchedDoctor = null;
     },
   },
 });
@@ -60,6 +70,7 @@ export const {
   addMatchedDoctor,
   resetMatchedDoctor,
   updateProfile,
+  changeAvailability,
   resetStateToDefault,
 } = sharedDataSlice.actions;
 

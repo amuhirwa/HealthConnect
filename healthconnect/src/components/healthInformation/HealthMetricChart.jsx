@@ -12,17 +12,13 @@ import {
 } from "recharts";
 import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
-export default function HealthMetricChart({ data, normalLimits }) {
+export default function HealthMetricChart({ data, normalLimits, dashboard }) {
   const [selectedMetric, setSelectedMetric] = useState("bmi");
 
   const metricsOptions = [
     { label: "BMI", value: "bmi" },
     { label: "Blood Glucose", value: "blood_glucose" },
     { label: "Blood Pressure", value: "blood_pressure" },
-    { label: "Heart Rate", value: "heart_rate" },
-    { label: "Cholesterol", value: "cholesterol" },
-    { label: "Weight", value: "weight" },
-    // Add more metrics as needed
   ];
 
   const handleChange = (event) => {
@@ -33,8 +29,9 @@ export default function HealthMetricChart({ data, normalLimits }) {
     <div className="mx-4 flex flex-col gap-6 w-full max-w-lg bg-white p-6 pb-3 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <span className="text-xl font-semibold text-blue-600">
-          Health Metric Chart
+          {!dashboard && "Health Metric Chart"}
         </span>
+        {!dashboard && (        
         <FormControl variant="outlined" size="small" className="w-48">
           <InputLabel>Metric</InputLabel>
           <Select
@@ -50,6 +47,7 @@ export default function HealthMetricChart({ data, normalLimits }) {
             ))}
           </Select>
         </FormControl>
+        )}
       </div>
 
       <ResponsiveContainer width="100%" height={300}>

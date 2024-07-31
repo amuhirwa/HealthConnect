@@ -93,12 +93,12 @@ export default function DoctorSchedule({ selectedFutureDoctor }) {
     const slot = `${selectedDate}T${selectedTime}:00Z`;
 
     try {
-      await instance.post("appointments/schedule", {
-        doctorId: selectedFutureDoctor.id,
+      await instance.post("appointments/create_appointment", {
+        doctorId: selectedFutureDoctor.user.id,
         patientId: patient.id,
-        slot
+        start: slot
       });
-      alert(`Appointment scheduled with ${selectedFutureDoctor.user.name} at ${slot}.`);
+      toast.success(`Appointment scheduled with ${selectedFutureDoctor.user.name} at ${slot}.`);
       setSelectedDate("");
       setSelectedTime("");
     } catch (error) {

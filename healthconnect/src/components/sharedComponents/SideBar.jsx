@@ -23,7 +23,6 @@ export default function SideBar({ isOpen, toggleSidebar }) {
         { icon: <TextSnippetIcon />, text: "Health Information" },
         { icon: <MedicationIcon />, text: "Prescriptions" },
         { icon: <PersonIcon />, text: "Account", category: "others" },
-        { icon: <HelpCenterIcon />, text: "call", category: "others" }
     ];
     menuItems.map(item => item.active = page === item.text.toLowerCase() ? true : false);
 
@@ -36,16 +35,16 @@ export default function SideBar({ isOpen, toggleSidebar }) {
     doctorMenuItems.map(item => item.active = page === item.text.toLowerCase() ? true : false);
 
     return (
-        <div className={`SideBar flex flex-shrink-0 flex-col h-[100vh] shadow-2xl ${isOpen ? "bg-[#1681af5c] transition-all duration-500 w-[100vw] p-4 sm:w-64 translate-x-0" : "p-0 transition-all duration-500 overflow-hidden w-0 -translate-x-64"} gap-4 text-2xl sm:text-base text-nowrap sticky top-0`}>
-            <div className="logo flex items-center gap-2 w-full mt-2">
+        <div className={`flex flex-shrink-0 flex-col h-[100vh] shadow-2xl ${isOpen ? "bg-[#1681af5c] transition-all duration-500 w-[100vw] p-4 sm:w-64 translate-x-0" : "p-0 transition-all duration-500 overflow-hidden w-0 -translate-x-64"} gap-4 text-2xl sm:text-base text-nowrap sticky top-0`}>
+            <div className="flex items-center gap-2 w-full mt-2">
                 <span className="hidden sm:block sm:text-xl text-[#12B536] sm:ml-1">
                     <span className="text-[#2F4AD6]">Health</span>Connect
                 </span>
                 <MenuOpenIcon sx={{ fontSize: 30, cursor: "pointer" }} onClick={toggleSidebar} />
             </div>
             <hr />
-            <div className={`main flex flex-col gap-4 ${isOpen ? "transition-all duration-500" : "p-0 transition-all duration-500 -translate-x-64"}`}>
-                <div className="menu ml-5 flex flex-col gap-4 sm:gap-3">
+            <div className={`flex flex-col gap-4 ${isOpen ? "transition-all duration-500" : "p-0 transition-all duration-500 -translate-x-64"}`}>
+                <div className="ml-5 flex flex-col gap-4 sm:gap-3">
                     <span className="text-xl sm:text-lg">Menu</span>
                     {(profile.user.user_role !== "Health Professional" ? menuItems : doctorMenuItems).filter(item => !item.category).map(({ icon, text, active }, index) => (
                         <div

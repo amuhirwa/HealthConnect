@@ -26,6 +26,7 @@ export default function VideoCall() {
   const userId = useSelector(
     (state) => state.sharedData.profile.patient.user.id
   );
+  const profile = useSelector((state) => state.sharedData.profile.patient);
   const dispatch = useDispatch();
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -196,12 +197,35 @@ export default function VideoCall() {
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
+        if (profile.user.user_role === "Health Professional") {
+          instance.post('change_availability')
+        }
       } catch (error) {
         console.error("Error accessing media devices:", error);
       }
     };
 
     getStreams();
+
+    return () => {
+      if (pcRef.current) {
+        pcRef.current.close();
+      }
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+      instance.patch("appointments/update_appointment", {
+        id: call_id.appointment_id,
+        call_id: "",
+        completed: true
+      });
+      if (profile.user.user_role === "Health Professional") {
+        instance.post('change_availability')
+      }
+      dispatch(resetCallId())
+    };
   }, []);
 
   useEffect(() => {
@@ -239,13 +263,18 @@ export default function VideoCall() {
   };
 
   const handleHangup = () => {
-    alert("Hanging up the call...");
+    toast.success("Hanging up the call...");
     if (pcRef.current) {
-      pcRef.current.close(); // Close the peer connection
+      pcRef.current.close();
     }
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop()); // Stop all tracks
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
     }
+    instance.patch("appointments/update_appointment", {
+      id: call_id.appointment_id,
+      call_id: "",
+      completed: true
+    });
     dispatch(resetCallId());
   };
 

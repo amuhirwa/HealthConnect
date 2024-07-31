@@ -13,6 +13,7 @@ export default function AvailableDoctors({selectedFutureDoctor, setSelectedFutur
   const [loading, setLoading] = useState(true);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [allDoctors, setAllDoctors] = useState([]);
   const instance = createAxiosInstance();
   const selectedDoctorRef = useRef(null);
   const selectedDoctorFutureRef = useRef(null);
@@ -26,7 +27,10 @@ export default function AvailableDoctors({selectedFutureDoctor, setSelectedFutur
           "appointments/get_available_doctors"
         );
         setDoctorsData(response.data);
-        console.log(response.data);
+        const otherResponse = await instance.get(
+          "appointments/get_all_doctors"
+        );
+        setAllDoctors(otherResponse.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
         setError("Failed to fetch doctors. Please try again later.");
@@ -53,13 +57,14 @@ export default function AvailableDoctors({selectedFutureDoctor, setSelectedFutur
     }
   };
 
+
   const filteredImmediateDoctors = doctorsData.filter(
     (doctor) =>
       doctor.user.name.toLowerCase().includes(immediateSearchTerm.toLowerCase()) ||
       doctor.specialization.toLowerCase().includes(immediateSearchTerm.toLowerCase())
   );
 
-  const filteredFutureDoctors = doctorsData.filter(
+  const filteredFutureDoctors = allDoctors.filter(
     (doctor) =>
       doctor.user.name.toLowerCase().includes(futureSearchTerm.toLowerCase()) ||
       doctor.specialization.toLowerCase().includes(futureSearchTerm.toLowerCase())

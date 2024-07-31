@@ -228,12 +228,12 @@ class PastMetrics(models.Model):
     blood_glucose = models.FloatField(blank=True, null=True)
     blood_pressure = models.TextField(blank=True, null=True)
     updated_field = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     @property
     def bmi(self):
         if self.height and self.weight:
-            return self.weight / ((self.height / 100) ** 2)
+            return round(self.weight / ((self.height / 100) ** 2), 2)
         return None
 
 

@@ -141,34 +141,6 @@ export default function LandingPage() {
             <p>Healthcare Professionals</p>
           </div>
         </div>
-        <div class="team-section">
-          <h2>Our team</h2>
-          <div class="team">
-            <div class="team-member">
-              <img src={Deolinda} alt="Deolinda Bogore" />
-              <p>Deolinda Bogore</p>
-            </div>
-            <div class="team-member">
-              <img src={Michael} alt="Alain Michael Muhirwa" />
-              <p>Alain Michael Muhirwa</p>
-            </div>
-            <div class="team-member">
-              <p>Lina Iratwe</p>
-            </div>
-            <div class="team-member">
-              <img
-                src={Gabriel}
-                alt="Gabriel Khot Garang Pauwoi"
-              />
-              <p>Gabriel Khot Garang Pauwoi</p>
-            </div>
-            <div class="team-member">
-              <img src={Lenine} alt="Lenine Ngenzi" />
-              <img src="" alt="" />
-              <p>Lenine Ngenzi</p>
-            </div>
-          </div>
-        </div>
       </main>
 
       <footer class="footer">
